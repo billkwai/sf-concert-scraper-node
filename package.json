@@ -1,15 +1,18 @@
 {
-    "name": "concerts-api",
-    "version": "1.0.0",
-    "private": true,
-    "description": "SF concert API",
-    "main": "index.js",
-    "engines": {
-      "node": "11.x"
-    },
-    "scripts": {
-      "start": "node index.js",
-      "start:dev": "nodemon index.js",
-      "test": "echo \"Error: no test specified\" && exit 1"
-    }
+  "name": "concerts-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SF concert API",
+  "main": "index.js",
+  "engines": {
+    "node": "11.x"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "start:dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "moment": "^2.24.0"
   }
+}
