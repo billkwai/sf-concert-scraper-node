@@ -22,8 +22,19 @@ function scrapeFillmore() {
             const url = $(this).find('.title').find('a').attr('href');
             const venue = 'Fillmore';
             const otherContent = $(this).find('.content').find('p').text();
-            const event_date_raw = otherContent.match(event_date_re)[0];
-            const event_time_raw = otherContent.match(event_time_re)[0].replace('.', '');
+
+            const event_date_raw_arr = otherContent.match(event_date_re);
+            if(event_date_raw_arr == null) { // check that a date was matched
+                return;
+            }
+            const event_date_raw = event_date_raw_arr[0];
+    
+            const event_time_raw_arr = otherContent.match(event_time_re);
+            if(event_time_raw_arr == null) {
+                return;
+            }
+            const event_time_raw = event_time_raw_arr[0].replace('.','');
+
             const event_price_raw = otherContent.match(event_price_re)[0];
 
             // convert date and time into datetime format
