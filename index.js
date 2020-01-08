@@ -1,7 +1,18 @@
 let scraper = require('./concert-scraper.js');
 var http = require('http');
 var format = require('pg-format');
+const nodemailer = require('nodemailer');
 const { pool } = require('./config');
+
+//mailtrap
+let transport = nodemailer.createTransport({
+    host: 'smtp.mailtrap.io',
+    port: 2525,
+    auth: {
+       user: 'facc061d677b90',
+       pass: '449df18ebabb6b'
+    }
+});
 
 // tests database query
 function getAllConcerts() {
@@ -51,7 +62,7 @@ function addConcerts(concerts) {
     // debugging comments
     //console.log(concerts);
     //console.log(format('INSERT INTO concerts (title, venue, url, date_and_time, price) VALUES %L', rows));
-    
+
     if(concerts.length != 0) {
         pool.query(format('INSERT INTO concerts (title, venue, url, date_and_time, price) VALUES %L;', rows), (err, res) => {
             if (err) {
@@ -66,14 +77,14 @@ function addConcerts(concerts) {
 
 // identifies new concerts and adds them to database
 // TODO: write functionality to remove events that have been removed / ended
-function getConcertDiff() {
-    let newEvents = scraper.scrapeFillmore().then(data => {
-        pool.query('SELECT * from concerts WHERE venue = ($1) ORDER BY title, venue, date_and_time;', ["Fillmore"], (err, res) => {
+async function getConcertDiff() {
+    let newEvents = await scraper.scrapeFillmore().then(async function(data) {
+        return await pool.query('SELECT * from concerts WHERE venue = ($1) ORDER BY title, venue, date_and_time;', ["Fillmore"], (err, res) => {
             if (err) {
                 console.log(err.stack);
             } else {
                 let newEventsArr = [];
-                let existingEvents = res.rows.sort(concertComparator);
+                let existingEvents = res.rows.sort(concertComparator); 
                 let newEvents = data.sort(concertComparator);
                 let i = 0;
                 let j = 0;
@@ -89,16 +100,38 @@ function getConcertDiff() {
                         j++;
                     }
                 }
-                console.log(newEventsArr);
-                addConcerts(newEventsArr);
+                return addConcerts(newEventsArr);
             }
         });
     });
+    return newEvents;
 };
 
 http.createServer(function(req, res) {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    getConcertDiff();
-    res.end();
+    if(req.url != '/favicon.ico') { //ignore favicon call 
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        let updates = getConcertDiff().then(function(value) {
+            console.log("this is the email message");
+            console.log(value);
+            const message = {
+                from: 'elonmusk@tesla.com', // Sender address
+                to: 'to@email.com',         // List of recipients
+                subject: 'SF concert scraper updates', // Subject line
+                text: JSON.stringify(value) // text body
+            };
+            //console.log(JSON.log(message)); 
+            /*
+            transport.sendMail(message, function(err, info) {
+                if (err) {
+                  console.log(err)
+                } else {
+                  console.log(info);
+                }
+            });
+            */
+           console.log("done");
+        });
+        res.end();
+    }
 }).listen(process.env.PORT || 8080);
 
