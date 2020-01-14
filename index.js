@@ -77,34 +77,30 @@ function addConcerts(concerts) {
 
 // identifies new concerts and adds them to database
 // TODO: write functionality to remove events that have been removed / ended
-async function getConcertDiff() {
-    let newEvents = await scraper.scrapeFillmore().then(async function(data) {
-        return await pool.query('SELECT * from concerts WHERE venue = ($1) ORDER BY title, venue, date_and_time;', ["Fillmore"], (err, res) => {
-            if (err) {
-                console.log(err.stack);
-            } else {
-                let newEventsArr = [];
-                let existingEvents = res.rows.sort(concertComparator); 
-                let newEvents = data.sort(concertComparator);
-                let i = 0;
-                let j = 0;
+function getConcertDiff() {
+    return scraper.scrapeFillmore().then(function(data) {
+        return pool.query('SELECT * from concerts WHERE venue = ($1) ORDER BY title, venue, date_and_time;', ["Fillmore"]).then(res => {
+            let newEventsArr = [];
+            let existingEvents = res.rows.sort(concertComparator); 
+            let newEvents = data.sort(concertComparator);
+            let i = 0;
+            let j = 0;
 
-                while (i < existingEvents.length && j < newEvents.length) {
-                    if (concertComparator(existingEvents[i], newEvents[j]) == 1) {
-                        newEventsArr.push(newEvents[j]);
-                        j++;
-                    } else if (concertComparator(existingEvents[i], newEvents[j]) == -1) {
-                        i++;
-                    } else {
-                        i++;
-                        j++;
-                    }
+            while (i < existingEvents.length && j < newEvents.length) {
+                if (concertComparator(existingEvents[i], newEvents[j]) == 1) {
+                    newEventsArr.push(newEvents[j]);
+                    j++;
+                } else if (concertComparator(existingEvents[i], newEvents[j]) == -1) {
+                    i++;
+                } else {
+                    i++;
+                    j++;
                 }
-                return addConcerts(newEventsArr);
             }
-        });
+            addConcerts(newEventsArr);
+            return newEventsArr;
+        }).catch(err => console.log(err.stack));
     });
-    return newEvents;
 };
 
 http.createServer(function(req, res) {
