@@ -130,10 +130,32 @@ function getConcertDiff() {
                 }
             }
             addConcerts(newEventsArr);
-            return [{new_events: newEventsArr}, {deleted_events: deletedEvents[1]}];
+            return {new_events: newEventsArr, deleted_events: deletedEvents[1]};
         }).catch(err => console.log(err.stack));
     });
 };
+
+function createEmailContent(concerts) {
+    let keys = ['venue', 'title', 'date_and_time', 'price', 'url'];
+    let html = "<table style='width:100%'>"
+    html += "<tr>"
+    html += "<th>Venue</th>"
+    html += "<th>Artist</th>"
+    html += "<th>date and time</th>"
+    html += "<th>price</th>"
+    html += "<th>details</th>"
+    for (var concert of concerts) {
+        html += "<tr>";
+        for (var key of keys) {
+            html += "<td>"
+            html += concert[key];
+            html += "</td>"
+        }
+    }
+    html += "</tr>"
+    html += "</table>"
+    return html;
+}
 
 const getConcerts = (request, response) => {
     removeOutdatedConcerts().then(() => {
@@ -145,21 +167,23 @@ const getConcerts = (request, response) => {
             from: 'elonmusk@tesla.com', // Sender address
             to: 'to@email.com',         // List of recipients
             subject: 'SF concert scraper updates', // Subject line
-            text: JSON.stringify(value) // text body
+            html: createEmailContent(value.new_events) // text body
         };
         console.log(message); 
         console.log("done");
         response.status(200).json(message);
-    }).catch(err => console.log(err.stack));
+
+        // send dummy mail
         /*
         transport.sendMail(message, function(err, info) {
             if (err) {
-              console.log(err)
+                console.log(err)
             } else {
-              console.log(info);
+                console.log(info);
             }
         });
         */
+    }).catch(err => console.log(err.stack));
 };
 
 app
