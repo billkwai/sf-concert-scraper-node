@@ -104,7 +104,6 @@ function removeOutdatedConcerts() {
 };
 
 // identifies new concerts and adds them to database
-// TODO: write functionality to remove events that have been removed / ended
 function getConcertDiff() {
     return scraper.scrapeFillmore().then(function(data) {
         return pool.query('SELECT * from concerts WHERE venue = ($1) ORDER BY title, venue, date_and_time;', ["Fillmore"]
@@ -138,19 +137,20 @@ function getConcertDiff() {
 
 const getConcerts = (request, response) => {
     removeOutdatedConcerts().then(() => {
-        let updates = getConcertDiff().then(function(value) {
-            console.log("this is the email message");
-            console.log(value);
-            const message = {
-                from: 'elonmusk@tesla.com', // Sender address
-                to: 'to@email.com',         // List of recipients
-                subject: 'SF concert scraper updates', // Subject line
-                text: JSON.stringify(value) // text body
-            };
-            console.log(message); 
-            console.log("done");
-            response.status(200).json(message);
-    });
+        return getConcertDiff();
+    }).then((value) => {
+        console.log("this is the email message");
+        console.log(value);
+        const message = {
+            from: 'elonmusk@tesla.com', // Sender address
+            to: 'to@email.com',         // List of recipients
+            subject: 'SF concert scraper updates', // Subject line
+            text: JSON.stringify(value) // text body
+        };
+        console.log(message); 
+        console.log("done");
+        response.status(200).json(message);
+    }).catch(err => console.log(err.stack));
         /*
         transport.sendMail(message, function(err, info) {
             if (err) {
@@ -160,7 +160,6 @@ const getConcerts = (request, response) => {
             }
         });
         */
-    }).catch(err => console.log(err.stack));
 };
 
 app
