@@ -1,8 +1,11 @@
+const express = require('express');
 let scraper = require('./concert-scraper.js');
 var http = require('http');
 var format = require('pg-format');
+var lodash = require('lodash');
 const nodemailer = require('nodemailer');
 const { pool } = require('./config');
+const app = express();
 
 //mailtrap
 let transport = nodemailer.createTransport({
@@ -59,10 +62,6 @@ function addConcerts(concerts) {
         return row;
     });
 
-    // debugging comments
-    //console.log(concerts);
-    //console.log(format('INSERT INTO concerts (title, venue, url, date_and_time, price) VALUES %L', rows));
-
     if(concerts.length != 0) {
         pool.query(format('INSERT INTO concerts (title, venue, url, date_and_time, price) VALUES %L;', rows), (err, res) => {
             if (err) {
@@ -72,14 +71,41 @@ function addConcerts(concerts) {
             }
         });
     }
+};
 
+// returns events that have been deleted and removes them from the database
+function getConcertDeleted(dbEvents, webEvents) {
+    let deletedEventsArr = [];
+    for (var dbEvent of dbEvents) {
+        let eventExists = false;
+        for (webEvent of webEvents) {
+            if(_.isEqual(dbEvent, webEvent)) {
+                eventExists = true;
+                break;
+            }
+        };
+        if (!eventExists) {
+            deletedEventsArr.push(dbEvent);
+            // remove deleted concert from database
+            // TODO: test this
+            pool.querty('DELETE from concerts where title = ($1) AND venue = ($2) AND date_and_time = ($3)', 
+            [dbEvent.title, dbEvent.venue, dbEvent.date_and_time]);
+        }
+    };
+    return deletedEventsArr;
+};
+
+// remove events that have already occured
+function removeOutdatedConcerts() {
+    pool.query('DELETE from concerts WHERE date_and_time < now()');
 };
 
 // identifies new concerts and adds them to database
 // TODO: write functionality to remove events that have been removed / ended
 function getConcertDiff() {
     return scraper.scrapeFillmore().then(function(data) {
-        return pool.query('SELECT * from concerts WHERE venue = ($1) ORDER BY title, venue, date_and_time;', ["Fillmore"]).then(res => {
+        return pool.query('SELECT * from concerts WHERE venue = ($1) ORDER BY title, venue, date_and_time;', ["Fillmore"]
+        ).then(res => {
             let newEventsArr = [];
             let existingEvents = res.rows.sort(concertComparator); 
             let newEvents = data.sort(concertComparator);
@@ -103,31 +129,50 @@ function getConcertDiff() {
     });
 };
 
+const getConcerts = (request, response) => {
+    let updates = getConcertDiff().then(function(value) {
+        console.log("this is the email message");
+        console.log(value);
+        const message = {
+            from: 'elonmusk@tesla.com', // Sender address
+            to: 'to@email.com',         // List of recipients
+            subject: 'SF concert scraper updates', // Subject line
+            text: JSON.stringify(value) // text body
+        };
+        console.log(message); 
+        /*
+        transport.sendMail(message, function(err, info) {
+            if (err) {
+              console.log(err)
+            } else {
+              console.log(info);
+            }
+        });
+        */
+       console.log("done");
+       response.status(200).json(message);
+    }).catch(err => console.log(err.stack));
+}
+
+app
+    .route('/concerts')
+    .get(getConcerts)
+
+
+// start server
+app.listen(process.env.PORT || 8080, () => {
+    console.log(`Server listening`)
+  });
+
+// old code
+/*
 http.createServer(function(req, res) {
     if(req.url != '/favicon.ico') { //ignore favicon call 
         res.writeHead(200, {'Content-Type': 'text/plain'});
-        let updates = getConcertDiff().then(function(value) {
-            console.log("this is the email message");
-            console.log(value);
-            const message = {
-                from: 'elonmusk@tesla.com', // Sender address
-                to: 'to@email.com',         // List of recipients
-                subject: 'SF concert scraper updates', // Subject line
-                text: JSON.stringify(value) // text body
-            };
-            //console.log(JSON.log(message)); 
-            /*
-            transport.sendMail(message, function(err, info) {
-                if (err) {
-                  console.log(err)
-                } else {
-                  console.log(info);
-                }
-            });
-            */
-           console.log("done");
+
         });
         res.end();
     }
 }).listen(process.env.PORT || 8080);
+*/
 
