@@ -2,7 +2,7 @@ const express = require('express');
 let scraper = require('./concert-scraper.js');
 var http = require('http');
 var format = require('pg-format');
-var lodash = require('lodash');
+var _ = require('lodash');
 const nodemailer = require('nodemailer');
 const { pool } = require('./config');
 const app = express();
@@ -76,6 +76,7 @@ function addConcerts(concerts) {
 // returns events that have been deleted and removes them from the database
 function getConcertDeleted(dbEvents, webEvents) {
     let deletedEventsArr = [];
+    let newExistingArr = []
     for (var dbEvent of dbEvents) {
         let eventExists = false;
         for (webEvent of webEvents) {
@@ -84,20 +85,22 @@ function getConcertDeleted(dbEvents, webEvents) {
                 break;
             }
         };
-        if (!eventExists) {
+        if (eventExists) {
+            newExistingArr.push(dbEvent);
+        } else {
             deletedEventsArr.push(dbEvent);
             // remove deleted concert from database
             // TODO: test this
-            pool.querty('DELETE from concerts where title = ($1) AND venue = ($2) AND date_and_time = ($3)', 
+            pool.query('DELETE from concerts where title = ($1) AND venue = ($2) AND date_and_time = ($3)', 
             [dbEvent.title, dbEvent.venue, dbEvent.date_and_time]);
         }
     };
-    return deletedEventsArr;
+    return [newExistingArr, deletedEventsArr];
 };
 
 // remove events that have already occured
 function removeOutdatedConcerts() {
-    pool.query('DELETE from concerts WHERE date_and_time < now()');
+     return pool.query('DELETE from concerts WHERE date_and_time < now()');
 };
 
 // identifies new concerts and adds them to database
@@ -109,6 +112,10 @@ function getConcertDiff() {
             let newEventsArr = [];
             let existingEvents = res.rows.sort(concertComparator); 
             let newEvents = data.sort(concertComparator);
+
+            let deletedEvents = getConcertDeleted(existingEvents, newEvents);
+            existingEvents = deletedEvents[0];
+
             let i = 0;
             let j = 0;
 
@@ -124,22 +131,26 @@ function getConcertDiff() {
                 }
             }
             addConcerts(newEventsArr);
-            return newEventsArr;
+            return [{new_events: newEventsArr}, {deleted_events: deletedEvents[1]}];
         }).catch(err => console.log(err.stack));
     });
 };
 
 const getConcerts = (request, response) => {
-    let updates = getConcertDiff().then(function(value) {
-        console.log("this is the email message");
-        console.log(value);
-        const message = {
-            from: 'elonmusk@tesla.com', // Sender address
-            to: 'to@email.com',         // List of recipients
-            subject: 'SF concert scraper updates', // Subject line
-            text: JSON.stringify(value) // text body
-        };
-        console.log(message); 
+    removeOutdatedConcerts().then(() => {
+        let updates = getConcertDiff().then(function(value) {
+            console.log("this is the email message");
+            console.log(value);
+            const message = {
+                from: 'elonmusk@tesla.com', // Sender address
+                to: 'to@email.com',         // List of recipients
+                subject: 'SF concert scraper updates', // Subject line
+                text: JSON.stringify(value) // text body
+            };
+            console.log(message); 
+            console.log("done");
+            response.status(200).json(message);
+    });
         /*
         transport.sendMail(message, function(err, info) {
             if (err) {
@@ -149,10 +160,8 @@ const getConcerts = (request, response) => {
             }
         });
         */
-       console.log("done");
-       response.status(200).json(message);
     }).catch(err => console.log(err.stack));
-}
+};
 
 app
     .route('/concerts')
