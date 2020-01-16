@@ -1,11 +1,13 @@
 const express = require('express');
-let scraper = require('./concert-scraper.js');
-var http = require('http');
-var format = require('pg-format');
-var _ = require('lodash');
+const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 const { pool } = require('./config');
 const app = express();
+var http = require('http');
+var format = require('pg-format');
+var _ = require('lodash');
+let scraper = require('./concert-scraper.js');
+
 
 //mailtrap
 let transport = nodemailer.createTransport({
@@ -163,7 +165,7 @@ const getConcerts = (request, response) => {
         };
         console.log(message); 
         console.log("done");
-        response.status(200).json(message);
+        //response.status(200).json(message);
 
         // send dummy mail
         /*
@@ -178,15 +180,20 @@ const getConcerts = (request, response) => {
     }).catch(err => console.log(err.stack));
 };
 
+// schedules a concert refresh sunday of every week
+cron.schedule("* * * * * Sunday", function() {
+    console.log("cron job starting");
+    getConcerts();
+});
+
 app
     .route('/concerts')
     .get(getConcerts)
 
-
 // start server
 app.listen(process.env.PORT || 8080, () => {
-    console.log(`Server listening`)
-  });
+    console.log(`Server listening`);
+});
 
 // old code
 /*
