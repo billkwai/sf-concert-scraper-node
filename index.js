@@ -151,32 +151,31 @@ function createEmailContent(concerts) {
     return html;
 }
 
+function sendEmail(data) {
+    const message = {
+        from: 'elonmusk@tesla.com', // Sender address
+        to: 'to@email.com',         // List of recipients
+        subject: 'SF concert scraper updates', // Subject line
+        html: createEmailContent(data.new_events) // text body
+    };
+    //send dummy mail to mailtrap
+    transport.sendMail(message, function(err, info) {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log(info);
+        }
+    });
+}
+
 const getConcerts = (request, response) => {
     removeOutdatedConcerts().then(() => {
         return getConcertDiff();
     }).then((value) => {
-        console.log("this is the email message");
         console.log(value);
-        const message = {
-            from: 'elonmusk@tesla.com', // Sender address
-            to: 'to@email.com',         // List of recipients
-            subject: 'SF concert scraper updates', // Subject line
-            html: createEmailContent(value.new_events) // text body
-        };
-        console.log(message); 
+        //sendEmail(value);
         console.log("done");
         //response.status(200).json(message);
-
-        // send dummy mail
-        /*
-        transport.sendMail(message, function(err, info) {
-            if (err) {
-                console.log(err)
-            } else {
-                console.log(info);
-            }
-        });
-        */
     }).catch(err => console.log(err.stack));
 };
 
