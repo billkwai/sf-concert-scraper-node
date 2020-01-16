@@ -131,7 +131,7 @@ function getConcertDiff() {
 
 function createEmailContent(concerts) {
     let keys = ['venue', 'title', 'date_and_time', 'price', 'url'];
-    let html = "<table style='width:100%'>"
+    let html = "<table style='width:100%' border='1'>"
     html += "<tr>"
     html += "<th>Venue</th>"
     html += "<th>Artist</th>"
@@ -166,6 +166,7 @@ function sendEmail(data) {
             console.log(info);
         }
     });
+    console.log("message has been sent");
 }
 
 const getConcerts = (request, response) => {
@@ -173,7 +174,7 @@ const getConcerts = (request, response) => {
         return getConcertDiff();
     }).then((value) => {
         console.log(value);
-        //sendEmail(value);
+        sendEmail(value);
         console.log("done");
         //response.status(200).json(message);
     }).catch(err => console.log(err.stack));
@@ -193,16 +194,4 @@ app
 app.listen(process.env.PORT || 8080, () => {
     console.log(`Server listening`);
 });
-
-// old code
-/*
-http.createServer(function(req, res) {
-    if(req.url != '/favicon.ico') { //ignore favicon call 
-        res.writeHead(200, {'Content-Type': 'text/plain'});
-
-        });
-        res.end();
-    }
-}).listen(process.env.PORT || 8080);
-*/
 
