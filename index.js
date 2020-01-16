@@ -28,28 +28,15 @@ function getAllConcerts() {
     });
 };
 
-// only use this function when populating an empty database for the first time
-function populateEmptyDatabase() {
-    let newEvents = scraper.scrapeFillmore().then(data => {
-        pool.query('SELECT * from concerts WHERE venue = ($1) ORDER BY title, venue, date_and_time', ["Fillmore"], (err, res) => {
-            if (err) {
-                console.log(err.stack);
-            } else {
-                addConcerts(data);
-            }
-        });
-    });
-};
-
 // comparator function to sort concert event objects by primary key (title, venue, and date_and_time)
 function concertComparator(a,b) {
-    if(a.title == b.title) {
-        if(a.venue == b.venue) {
-            return a.date_and_time > b.date_and_time ? 1 : a.date_and_time < b.date_and_time ? -1 : 0;
+    if(a.date_and_time == b.date_and_time) {
+        if(a.title == b.title) {
+            return a.venue > b.venue ? 1 : a.venue < b.venue ? -1 : 0;
         }
-        return a.venue > b.venue ? 1 : a.venue < b.venue ? -1 : 0;
+        return a.title > b.title ? 1 : a.title < b.title ? -1 : 0;
     }
-    return a.title > b.title ? 1 : a.title < b.title ? -1 : 0;
+    return a.date_and_time > b.date_and_time ? 1 : a.date_and_time < b.date_and_time ? -1 : 0;
 };
 
 // adds concert events into database
@@ -118,6 +105,11 @@ function getConcertDiff() {
             let i = 0;
             let j = 0;
 
+            // if database is empty, then all events are new
+            if(existingEvents.length == 0) {
+                newEventsArr = newEvents;
+            }
+
             while (i < existingEvents.length && j < newEvents.length) {
                 if (concertComparator(existingEvents[i], newEvents[j]) == 1) {
                     newEventsArr.push(newEvents[j]);
@@ -142,8 +134,8 @@ function createEmailContent(concerts) {
     html += "<th>Venue</th>"
     html += "<th>Artist</th>"
     html += "<th>date and time</th>"
-    html += "<th>price</th>"
-    html += "<th>details</th>"
+    html += "<th>Price</th>"
+    html += "<th>Details</th>"
     for (var concert of concerts) {
         html += "<tr>";
         for (var key of keys) {
