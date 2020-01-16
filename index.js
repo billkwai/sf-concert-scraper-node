@@ -124,21 +124,42 @@ function getConcertDiff() {
                 }
             }
             addConcerts(newEventsArr);
-            return {new_events: newEventsArr, deleted_events: deletedEvents[1]};
+            return {new_events: newEventsArr, deleted_events: deletedEvents[1], all_events: newEvents};
         }).catch(err => console.log(err.stack));
     });
 };
 
 function createEmailContent(concerts) {
     let keys = ['venue', 'title', 'date_and_time', 'price', 'url'];
-    let html = "<table style='width:100%' border='1'>"
+    html = "<h1>SF Concert Scraper Digest</h1>"
+    html += "<h2>New events added this week</h2>"
+    html += "<table style='width:100%' border='1'>"
     html += "<tr>"
     html += "<th>Venue</th>"
     html += "<th>Artist</th>"
     html += "<th>date and time</th>"
     html += "<th>Price</th>"
     html += "<th>Details</th>"
-    for (var concert of concerts) {
+    for (var concert of concerts.new_events) {
+        html += "<tr>";
+        for (var key of keys) {
+            html += "<td>"
+            html += concert[key];
+            html += "</td>"
+        }
+    }
+    html += "</tr>"
+    html += "</table>"
+    html += "<br><br>"
+    html += "<h2>All events on the calendar</h2>"
+    html += "<table style='width:100%' border='1'>"
+    html += "<tr>"
+    html += "<th>Venue</th>"
+    html += "<th>Artist</th>"
+    html += "<th>date and time</th>"
+    html += "<th>Price</th>"
+    html += "<th>Details</th>"
+    for (var concert of concerts.all_events) {
         html += "<tr>";
         for (var key of keys) {
             html += "<td>"
@@ -156,7 +177,7 @@ function sendEmail(data) {
         from: 'elonmusk@tesla.com', // Sender address
         to: 'to@email.com',         // List of recipients
         subject: 'SF concert scraper updates', // Subject line
-        html: createEmailContent(data.new_events) // text body
+        html: createEmailContent(data) // text body
     };
     //send dummy mail to mailtrap
     transport.sendMail(message, function(err, info) {
@@ -176,14 +197,14 @@ const getConcerts = (request, response) => {
         console.log(value);
         sendEmail(value);
         console.log("done");
-        //response.status(200).json(message);
+        response.status(200).json(message);
     }).catch(err => console.log(err.stack));
 };
 
 // schedules a concert refresh sunday of every week
 cron.schedule("* * * * * Sunday", function() {
     console.log("cron job starting");
-    getConcerts();
+    getConcerts(); // TODO: pass in an empty response
 });
 
 app
