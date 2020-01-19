@@ -120,6 +120,13 @@ function getConcertDiff() {
 };
 
 function createEmailContent(concerts) {
+    // date and time formatting options
+    var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit'};
+    options.timeZone = 'America/Los_Angeles';
+    options.timeZoneName = 'short';
+    options.hour12 - true;
+
+    // all known keys in each concert object
     let keys = ['venue', 'title', 'date_and_time', 'price', 'url'];
     html = "<h1>SF Concert Digest</h1>"
     html += "<h2>New events added this week</h2>"
@@ -143,7 +150,11 @@ function createEmailContent(concerts) {
                 html += "</td>"
             } else {
                 html += "<td>"
-                html += concert[key];
+                if(key === 'date_and_time') {
+                    html += concert[key].toLocaleString("en-US", options);
+                } else {
+                    html += concert[key];
+                }
                 html += "</td>"
             }
         }
@@ -172,7 +183,11 @@ function createEmailContent(concerts) {
                 html += "</td>"
             } else {
                 html += "<td>"
-                html += concert[key];
+                if(key === 'date_and_time') {
+                    html += concert[key].toLocaleString("en-US", options);
+                } else {
+                    html += concert[key];
+                }
                 html += "</td>"
             }
         }
