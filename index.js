@@ -155,9 +155,19 @@ function createEmailContent(concerts) {
     for (var concert of concerts.new_events) {
         html += "<tr>";
         for (var key of keys) {
-            html += "<td>"
-            html += concert[key];
-            html += "</td>"
+            if(key === 'url') {
+                html += "<td>"
+                html += "<a href='"
+                html += concert[key]
+                html += "'>"
+                html += concert[key]
+                html += "</a>"
+                html += "</td>"
+            } else {
+                html += "<td>"
+                html += concert[key];
+                html += "</td>"
+            }
         }
     }
     html += "</tr>"
@@ -174,9 +184,19 @@ function createEmailContent(concerts) {
     for (var concert of concerts.all_events) {
         html += "<tr>";
         for (var key of keys) {
-            html += "<td>"
-            html += concert[key];
-            html += "</td>"
+            if(key === 'url') {
+                html += "<td>"
+                html += "<a href='"
+                html += concert[key]
+                html += "'>"
+                html += concert[key]
+                html += "</a>"
+                html += "</td>"
+            } else {
+                html += "<td>"
+                html += concert[key];
+                html += "</td>"
+            }
         }
     }
     html += "</tr>"
