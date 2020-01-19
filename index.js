@@ -46,6 +46,7 @@ function addConcerts(concerts) {
             if (err) {
                 console.log(err.stack);
             } else {
+                console.log("res data");
                 console.log(res.data);
             }
         });
@@ -228,7 +229,7 @@ const getConcerts = (request, response) => {
 };
 
 // schedules a concert refresh sunday of every week
-cron.schedule("* * 14 * * Sunday", function() {
+cron.schedule("0 0 12 * * Sunday", function() {
     console.log("cron job starting");
     getConcerts(); // TODO: pass in an empty response
 });

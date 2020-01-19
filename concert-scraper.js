@@ -1,6 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 function scrapeFillmore() {
 
@@ -38,7 +38,7 @@ function scrapeFillmore() {
             const event_price_raw = otherContent.match(event_price_re)[0];
 
             // convert date and time into datetime format
-            const event_datetime = new moment(event_date_raw + ' ' + event_time_raw, 'MMMM D YYYY h:mm a').toDate();
+            const event_datetime = new moment(event_date_raw + ' ' + event_time_raw, 'MMMM D YYYY h:mm a').tz('America/Los_Angeles').utc().toDate();
             events.push({title, venue, url, date_and_time: event_datetime, price: event_price_raw});
         });
         //console.log(events);
