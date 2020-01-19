@@ -3,11 +3,14 @@ const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 const { pool } = require('./config');
 const {transport} = require('./config');
+const moment = require('moment-timezone');
+moment.tz.setDefault('Etc/UTC');
 const app = express();
 var http = require('http');
 var format = require('pg-format');
 var _ = require('lodash');
 let scraper = require('./concert-scraper.js');
+
 
 // tests database query
 function getAllConcerts() {
@@ -22,13 +25,15 @@ function getAllConcerts() {
 
 // comparator function to sort concert event objects by primary key (title, venue, and date_and_time)
 function concertComparator(a,b) {
-    if(a.date_and_time == b.date_and_time) {
+    aTimeStamp = moment.utc(a.date_and_time);
+    bTimeStamp = moment.utc(b.date_and_time);
+    if(aTimeStamp == bTimeStamp) {
         if(a.title == b.title) {
             return a.venue > b.venue ? 1 : a.venue < b.venue ? -1 : 0;
         }
         return a.title > b.title ? 1 : a.title < b.title ? -1 : 0;
     }
-    return a.date_and_time > b.date_and_time ? 1 : a.date_and_time < b.date_and_time ? -1 : 0;
+    return aTimeStamp > bTimeStamp ? 1 : aTimeStamp < bTimeStamp ? -1 : 0;
 };
 
 // adds concert events into database
@@ -125,7 +130,7 @@ function createEmailContent(concerts) {
     var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit'};
     options.timeZone = 'America/Los_Angeles';
     options.timeZoneName = 'short';
-    options.hour12 - true;
+    options.hour12 = true;
 
     // all known keys in each concert object
     let keys = ['venue', 'title', 'date_and_time', 'price', 'url'];
@@ -152,7 +157,7 @@ function createEmailContent(concerts) {
             } else {
                 html += "<td>"
                 if(key === 'date_and_time') {
-                    html += concert[key].toLocaleString("en-US", options);
+                    html += concert[key].getUTCDate().toLocaleString("en-US", options);
                 } else {
                     html += concert[key];
                 }
@@ -231,7 +236,7 @@ const getConcerts = (request, response) => {
 // schedules a concert refresh sunday of every week
 cron.schedule("0 0 12 * * Sunday", function() {
     console.log("cron job starting");
-    getConcerts(); // TODO: pass in an empty response
+    getConcerts();
 });
 
 app
