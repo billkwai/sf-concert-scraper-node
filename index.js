@@ -213,7 +213,7 @@ const getConcerts = (request, response) => {
 };
 
 // schedules a concert refresh sunday of every week
-cron.schedule("* * 10 * * Sunday", function() {
+cron.schedule("* * 14 * * Sunday", function() {
     console.log("cron job starting");
     getConcerts(); // TODO: pass in an empty response
 });
