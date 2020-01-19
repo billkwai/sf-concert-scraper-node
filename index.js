@@ -10,12 +10,24 @@ let scraper = require('./concert-scraper.js');
 
 
 //mailtrap
+/*
 let transport = nodemailer.createTransport({
     host: 'smtp.mailtrap.io',
     port: 2525,
     auth: {
        user: 'facc061d677b90',
        pass: '449df18ebabb6b'
+    }
+});
+*/
+
+// Ethereal email
+const transport = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+        user: 'theron60@ethereal.email',
+        pass: 'n2NGsB3FbJJ4CwZfZq'
     }
 });
 
@@ -179,30 +191,34 @@ function sendEmail(data) {
         subject: 'SF concert scraper updates', // Subject line
         html: createEmailContent(data) // text body
     };
-    //send dummy mail to mailtrap
+    //send email
     transport.sendMail(message, function(err, info) {
         if (err) {
             console.log(err)
         } else {
-            console.log(info);
+            console.log("Message sent: %s", info.messageId);
+            console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
         }
     });
-    console.log("message has been sent");
 }
 
 const getConcerts = (request, response) => {
     removeOutdatedConcerts().then(() => {
         return getConcertDiff();
     }).then((value) => {
-        console.log(value);
+        //console.log(value);
         sendEmail(value);
-        console.log("done");
-        response.status(200).json(message);
     }).catch(err => console.log(err.stack));
+    if(response) {
+        response.writeHead(200, {"Content-Type": "application/json"});
+        response.write(JSON.stringify({
+            status: 200
+        }));
+    }
 };
 
 // schedules a concert refresh sunday of every week
-cron.schedule("* * * * * Sunday", function() {
+cron.schedule("* * 10 * * Sunday", function() {
     console.log("cron job starting");
     getConcerts(); // TODO: pass in an empty response
 });
