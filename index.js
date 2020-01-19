@@ -2,34 +2,12 @@ const express = require('express');
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 const { pool } = require('./config');
+const {transport} = require('./config');
 const app = express();
 var http = require('http');
 var format = require('pg-format');
 var _ = require('lodash');
 let scraper = require('./concert-scraper.js');
-
-
-//mailtrap
-/*
-let transport = nodemailer.createTransport({
-    host: 'smtp.mailtrap.io',
-    port: 2525,
-    auth: {
-       user: 'facc061d677b90',
-       pass: '449df18ebabb6b'
-    }
-});
-*/
-
-// Ethereal email
-const transport = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    auth: {
-        user: 'theron60@ethereal.email',
-        pass: 'n2NGsB3FbJJ4CwZfZq'
-    }
-});
 
 // tests database query
 function getAllConcerts() {
@@ -143,7 +121,7 @@ function getConcertDiff() {
 
 function createEmailContent(concerts) {
     let keys = ['venue', 'title', 'date_and_time', 'price', 'url'];
-    html = "<h1>SF Concert Scraper Digest</h1>"
+    html = "<h1>SF Concert Digest</h1>"
     html += "<h2>New events added this week</h2>"
     html += "<table style='width:100%' border='1'>"
     html += "<tr>"
@@ -206,9 +184,9 @@ function createEmailContent(concerts) {
 
 function sendEmail(data) {
     const message = {
-        from: 'elonmusk@tesla.com', // Sender address
-        to: 'to@email.com',         // List of recipients
-        subject: 'SF concert scraper updates', // Subject line
+        from: 'concert.digest@gmail.com', // Sender address
+        to: 'billkwai@gmail.com',         // List of recipients
+        subject: 'SF concerts -- this week\'s updates,', // Subject line
         html: createEmailContent(data) // text body
     };
     //send email

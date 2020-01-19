@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const nodemailer = require('nodemailer');
+
 const { Pool } = require('pg');
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -10,4 +12,25 @@ const pool = new Pool({
   ssl: isProduction,
 });
 
-module.exports = { pool };
+let transportDetails = {};
+if (isProduction) {
+    transportDetails = {
+        service: 'gmail',
+        auth: {
+               user: 'concert.digest@gmail.com',
+               pass: 'concert#88'
+           }
+    };
+} else {
+    transportDetails = {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+            user: 'theron60@ethereal.email',
+            pass: 'n2NGsB3FbJJ4CwZfZq'
+        }
+    };
+}
+const transport = nodemailer.createTransport(transportDetails);
+
+module.exports = { pool, transport};
