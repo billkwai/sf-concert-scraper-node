@@ -2,10 +2,10 @@
   "name": "concerts-api",
   "version": "1.0.0",
   "private": true,
-  "description": "SF concert API",
+  "description": "SF concert scraper",
   "main": "index.js",
   "engines": {
-    "node": "11.x"
+    "node": "12.x"
   },
   "scripts": {
     "start": "node index.js",
@@ -23,5 +23,8 @@
     "nodemailer": "^6.4.2",
     "pg": "^7.17.1",
     "pg-format": "^1.0.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
   }
 }

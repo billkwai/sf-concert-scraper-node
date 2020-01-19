@@ -208,10 +208,7 @@ const getConcerts = (request, response) => {
         sendEmail(value);
     }).catch(err => console.log(err.stack));
     if(response) {
-        response.writeHead(200, {"Content-Type": "application/json"});
-        response.write(JSON.stringify({
-            status: 200
-        }));
+        response.status(200).json({status: 'success', message: 'getConcert endpoint hit'});
     }
 };
 
