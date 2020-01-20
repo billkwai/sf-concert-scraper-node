@@ -9,8 +9,12 @@ const app = express();
 var http = require('http');
 var format = require('pg-format');
 var _ = require('lodash');
+var path = require('path');
 let scraper = require('./concert-scraper.js');
 
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
 
 // tests database query
 function getAllConcerts() {
@@ -242,6 +246,12 @@ cron.schedule("0 0 9 * * Sunday", function() {
 app
     .route('/concerts')
     .get(getConcerts)
+
+app
+    .route('/')
+    .get(function(req, res, next) {
+        res.render('index', {title: 'SF Concert Scraper'});
+    })
 
 // start server
 app.listen(process.env.PORT || 8080, () => {
