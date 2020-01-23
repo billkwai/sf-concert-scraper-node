@@ -9,7 +9,7 @@ CREATE TABLE concerts (
 
 CREATE TABLE users (
 	email TEXT NOT NULL,
-	signup_date_and_time TIMESTAMPTZ NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL,
 	loc TEXT NOT NULL,
 	PRIMARY KEY (email)
 );

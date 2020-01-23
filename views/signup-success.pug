@@ -1,2 +1,6 @@
 // return subscribe success message
-p #{email} has been subscribed!
+
+if !error
+    p #{email} has been subscribed!
+else
+    p There was an error and you were not subscribed.
