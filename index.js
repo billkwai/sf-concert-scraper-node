@@ -6,11 +6,17 @@ const {transport} = require('./config');
 const moment = require('moment-timezone');
 moment.tz.setDefault('Etc/UTC');
 const app = express();
+const bodyParser = require('body-parser');
+const { check, validationResult } = require('express-validator');
 var http = require('http');
 var format = require('pg-format');
 var _ = require('lodash');
 var path = require('path');
 let scraper = require('./concert-scraper.js');
+
+//Handles post requests
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -237,6 +243,17 @@ const getConcerts = (request, response) => {
     }
 };
 
+// subscribes a user
+const subscribeUser = (request, response) => {
+    // Finds the validation errors in this request and wraps them in an object
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+        return response.status(422).json({ errors: errors.array() });
+    } else {
+        return response.status(200).render('signup-success', {email: request.body.email});
+    }
+}
+
 // schedules a concert refresh sunday of every week
 cron.schedule("0 0 9 * * Sunday", function() {
     console.log("cron job starting");
@@ -252,6 +269,10 @@ app
     .get(function(req, res, next) {
         res.render('index', {title: 'SF Concert Scraper'});
     })
+
+app
+    .route('/register')
+    .post([check('email').isEmail()], subscribeUser)
 
 // start server
 app.listen(process.env.PORT || 8080, () => {
