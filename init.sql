@@ -6,3 +6,10 @@ CREATE TABLE concerts (
 	price MONEY,
 	PRIMARY KEY(title, venue, date_and_time)
 );
+
+CREATE TABLE users (
+	email TEXT NOT NULL,
+	signup_date_and_time TIMESTAMPTZ NOT NULL,
+	loc TEXT NOT NULL,
+	PRIMARY KEY (email)
+);
