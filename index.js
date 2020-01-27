@@ -167,7 +167,7 @@ function createEmailContent(concerts) {
             } else {
                 html += "<td>"
                 if(key === 'date_and_time') {
-                    html += concert[key].getUTCDate().toLocaleString("en-US", options);
+                    html += concert[key].toLocaleString("en-US", options);
                 } else {
                     html += concert[key];
                 }
@@ -214,6 +214,8 @@ function createEmailContent(concerts) {
 }
 
 function sendEmail(data) {
+    //let users = await getUsers();
+    //console.log(users);
     const message = {
         from: 'concert.digest@gmail.com', // Sender address
         to: 'billkwai@gmail.com',         // List of recipients
@@ -228,6 +230,7 @@ function sendEmail(data) {
             console.log("Message sent: %s", info.messageId);
             console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
         }
+        transport.close();
     });
 }
 
@@ -245,6 +248,16 @@ const getConcerts = (request, response) => {
 
 function createUser(email, loc) {
     return pool.query('INSERT into users (email, created_at, loc) values ($1, current_timestamp, $2)', [email, loc]);
+}
+
+function getUsers() {
+    return pool.query('SELECT * from users', (err, res) => {
+        if (err) {
+            console.log(err.stack);
+        } else {
+            return res.rows;
+        }
+    });
 }
 
 // subscribes a user

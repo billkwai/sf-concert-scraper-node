@@ -25,6 +25,7 @@ if (isProduction) {
     transportDetails = {
         host: 'smtp.ethereal.email',
         port: 587,
+        secure: false,
         auth: {
             user: 'theron60@ethereal.email',
             pass: 'n2NGsB3FbJJ4CwZfZq'
