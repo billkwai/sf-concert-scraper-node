@@ -16,6 +16,7 @@ let transportDetails = {};
 if (isProduction) {
     transportDetails = {
         service: 'gmail',
+        pool: true,
         auth: {
                user: 'concert.digest@gmail.com',
                pass: 'concert#88'

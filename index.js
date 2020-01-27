@@ -61,8 +61,9 @@ function addConcerts(concerts) {
             if (err) {
                 console.log(err.stack);
             } else {
-                console.log("res data");
-                console.log(res.data);
+                if (res.data) {
+                    console.log(res.data);
+                }
             }
         });
     }
@@ -213,25 +214,35 @@ function createEmailContent(concerts) {
     return html;
 }
 
-function sendEmail(data) {
-    //let users = await getUsers();
-    //console.log(users);
-    const message = {
-        from: 'concert.digest@gmail.com', // Sender address
-        to: 'billkwai@gmail.com',         // List of recipients
-        subject: 'SF concerts -- this week\'s updates,', // Subject line
-        html: createEmailContent(data) // text body
-    };
-    //send email
-    transport.sendMail(message, function(err, info) {
-        if (err) {
-            console.log(err)
-        } else {
-            console.log("Message sent: %s", info.messageId);
-            console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        }
-        transport.close();
-    });
+async function sendEmail(data) {
+    try {
+        let users = await getUsers();
+        let emails = [];
+        users.rows.forEach(function(user) {
+            emails.push(user.email);
+        })
+        console.log(emails);
+
+        const message = {
+            from: 'concert.digest@gmail.com', // Sender address
+            to: 'concert.digest@gmail.com',
+            bcc: emails,         // List of recipients
+            subject: 'SF concerts -- this week\'s updates,', // Subject line
+            html: createEmailContent(data) // text body
+        };
+        //send email
+        transport.sendMail(message, function(err, info) {
+            if (err) {
+                console.log(err)
+            } else {
+                console.log("Message sent: %s", info.messageId);
+                console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+            }
+            transport.close();
+        });
+    } catch(error) {
+        console.log(error);
+    }
 }
 
 const getConcerts = (request, response) => {
@@ -251,13 +262,7 @@ function createUser(email, loc) {
 }
 
 function getUsers() {
-    return pool.query('SELECT * from users', (err, res) => {
-        if (err) {
-            console.log(err.stack);
-        } else {
-            return res.rows;
-        }
-    });
+    return pool.query('SELECT * from users');
 }
 
 // subscribes a user
