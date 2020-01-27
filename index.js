@@ -258,7 +258,7 @@ const getConcerts = (request, response) => {
 };
 
 function createUser(email, loc) {
-    return pool.query('INSERT into users (email, created_at, loc) values ($1, current_timestamp, $2)', [email, loc]);
+    return pool.query('INSERT into users (email, created_at, loc) values ($1, current_timestamp, $2) ON CONFLICT DO NOTHING', [email, loc]);
 }
 
 function getUsers() {
