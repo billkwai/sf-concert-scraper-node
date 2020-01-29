@@ -7,7 +7,6 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('Etc/UTC');
 const app = express();
 const bodyParser = require('body-parser');
-const { check, validationResult } = require('express-validator');
 var http = require('http');
 var format = require('pg-format');
 var _ = require('lodash');
@@ -265,38 +264,13 @@ const getConcerts = (request, response) => {
     }
 };
 
-function createUser(email, loc) {
-    return pool.query('INSERT into users (email, created_at, loc) values ($1, current_timestamp, $2) ON CONFLICT DO NOTHING', [email, loc]);
-}
-
 function getUsers() {
     return pool.query('SELECT * from users');
-}
-
-// subscribes a user
-const subscribeUser = async (request, response) => {
-    // Finds the validation errors in this request and wraps them in an object
-    const errors = validationResult(request);
-    if (!errors.isEmpty()) {
-        return response.status(422).json({ errors: errors.array() });
-    } else {
-        try {
-            await createUser(request.body.email, 'San Francisco');
-            return response.status(200).render('signup-success', {email: request.body.email, error: false});
-        } catch (error) {
-            console.log(error);
-            return response.status(500).render('signup-success', {email: request.body.email, error: true});
-        }
-    }
 }
 
 app
     .route('/concerts')
     .get(getConcerts)
-
-app
-    .route('/register')
-    .post([check('email').isEmail()], subscribeUser)
 
 // start server
 app.listen(process.env.PORT || 8080, () => {
