@@ -14,13 +14,17 @@ var _ = require('lodash');
 var path = require('path');
 let scraper = require('./concert-scraper.js');
 
-//Handles post requests
+// Handles post requests
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
+
+// adds routers
+var indexRouter = require('./routes/index');
+app.use('/', indexRouter);
 
 // tests database query
 function getAllConcerts() {
@@ -289,12 +293,6 @@ const subscribeUser = async (request, response) => {
 app
     .route('/concerts')
     .get(getConcerts)
-
-app
-    .route('/')
-    .get(function(req, res, next) {
-        res.render('index', {title: 'SF Concert Scraper'});
-    })
 
 app
     .route('/register')
