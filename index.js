@@ -121,7 +121,11 @@ function getConcertDiff() {
 
             while (i < existingEvents.length && j < newEvents.length) {
                 if (concertComparator(existingEvents[i], newEvents[j]) == 1) {
-                    newEventsArr.push(newEvents[j]);
+                    // sometimes, outdated events are still posted on the website
+                    var now = new Date();
+                    if(now > newEvents[j].date_and_time) {
+                        newEventsArr.push(newEvents[j]);
+                    }
                     j++;
                 } else if (concertComparator(existingEvents[i], newEvents[j]) == -1) {
                     i++;
