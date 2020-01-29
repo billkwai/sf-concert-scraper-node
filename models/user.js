@@ -15,10 +15,10 @@ const User = {
         } else {
             try {
                 await createUser(request.body.email, 'San Francisco');
-                return response.status(200).render('signup-success', {email: request.body.email, error: false});
+                return response.status(200).render('register-response', {email: request.body.email, error: false});
             } catch (error) {
                 console.log(error);
-                return response.status(500).render('signup-success', {email: request.body.email, error: true});
+                return response.status(500).render('register-response', {email: request.body.email, error: true});
             }
         }
     }
