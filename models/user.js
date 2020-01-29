@@ -1,6 +1,8 @@
 const { pool } = require('../config');
 const { validationResult } = require('express-validator');
 
+
+
 function createUser(email, loc) {
     return pool.query('INSERT into users (email, created_at, loc) values ($1, current_timestamp, $2) ON CONFLICT DO NOTHING', [email, loc]);
 }
