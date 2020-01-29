@@ -286,12 +286,6 @@ const subscribeUser = async (request, response) => {
     }
 }
 
-// schedules a concert refresh sunday of every week
-cron.schedule("0 0 9 * * Sunday", function() {
-    console.log("cron job starting");
-    getConcerts();
-}, {timezone: 'America/Los_Angeles'});
-
 app
     .route('/concerts')
     .get(getConcerts)
