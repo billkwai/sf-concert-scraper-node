@@ -7,6 +7,10 @@ function createUser(email, loc) {
     return pool.query('INSERT into users (email, created_at, loc) values ($1, current_timestamp, $2) ON CONFLICT DO NOTHING', [email, loc]);
 }
 
+function getUsers() {
+    return pool.query('SELECT * from users');
+}
+
 const User = {
     // subscribes a user
     async registerUser (request, response) {
@@ -23,7 +27,8 @@ const User = {
                 return response.status(500).render('register-response', {email: request.body.email, error: true});
             }
         }
-    }
+    },
+    getUsers
 };
 
 module.exports = User;
