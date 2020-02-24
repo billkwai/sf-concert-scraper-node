@@ -16,6 +16,13 @@ exports.update_concerts = function(req, res) {
     }
 }
 
+exports.test_concerts = function(req, res) {
+    Concert.testConcerts();
+    if(res) {
+        return res.status(200).json({status: 'success', message: 'concert testing endpoint hit'});
+    }
+}
+
 async function sendEmail(data) {
     try {
         let users = await User.getUsers();

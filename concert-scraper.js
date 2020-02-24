@@ -48,7 +48,28 @@ function scrapeFillmore() {
     .catch(console.error);
 }
 
+function scrapeFoopee() {
+    const url = 'http://www.foopee.com/punk/the-list/by-club.0.html';
+    let events = axios(url)
+    .then(response => {
+        const venues = ['1015_Folsom__S_F_','August_Hall__S_F_'];
+        const html = response.data;
+        const $ = cheerio.load(html);
+        const allEvents = $('li');
+        //console.log(allEvents);
+        venues.forEach(venue => {
+            const venueDOM = $(`a[name="${venue}"]`);
+            console.log(venueDOM)
+            console.log(`a[name="${venue}"]`);
+            //const venueName = venueDOM.find('br').text();
+            //console.log(venueName);
+        });
+    })
+    .catch(console.error);
+}
+
 module.exports.scrapeFillmore = scrapeFillmore;
+module.exports.scrapeFoopee = scrapeFoopee;
 
 /*
 scrapeFillmore().then(data => {

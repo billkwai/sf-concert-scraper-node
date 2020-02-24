@@ -16,4 +16,7 @@ router.post('/user/register', [check('email').isEmail()], user_controller.user_r
 // GET request to update concerts and send email
 router.get('/concerts/update', concert_controller.update_concerts);
 
+//GET request for dev testing
+router.get('/concerts/test', concert_controller.test_concerts);
+
 module.exports = router;

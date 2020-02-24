@@ -123,9 +123,14 @@ function getConcertDiff() {
     });
 };
 
+function testConcerts() {
+    return scraper.scrapeFoopee();
+}
+
 const Concert = {
     removeOutdatedConcerts,
-    getConcertDiff
+    getConcertDiff,
+    testConcerts
 };
 
 module.exports = Concert;
