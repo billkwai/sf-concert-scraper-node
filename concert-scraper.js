@@ -56,14 +56,37 @@ function scrapeFoopee() {
         const html = response.data;
         const $ = cheerio.load(html);
         const allEvents = $('li');
+        $('body > ul > li').each(function(i, venue) { // loop through venue
+            //console.log(venue);
+            venueName = $(venue).find('a').attr('name');
+            if(venues.includes(venueName)) { // is a target venue
+                $(venue).find('ul > li').each(function(j, event) { // loop through events
+                    var eventDate = "";
+                    var eventArtist = [];
+                    $(event).find('a').each(function(k, eventInfo) { // loop through tags
+                        const info = $(eventInfo).attr('href');
+                        if(info.includes("by-date")) { // date tag
+                            eventDate = $(eventInfo).text();
+                        } else if(info.includes("by-band")) { // band tag
+                            eventArtist.push($(eventInfo).text());
+                        }
+                    });
+                    console.log(eventDate);
+                    console.log(eventArtist);
+                });
+            }
+        });
         //console.log(allEvents);
+        /*
         venues.forEach(venue => {
-            const venueDOM = $(`a[name="${venue}"]`);
-            console.log(venueDOM)
+            const venueDOM = $(this).find(`li`).get(0);
+            const listofEvents = $(`a[name="${venue}"]`);
+            console.log(listofEvents);
             console.log(`a[name="${venue}"]`);
+            */
             //const venueName = venueDOM.find('br').text();
             //console.log(venueName);
-        });
+        //});
     })
     .catch(console.error);
 }
