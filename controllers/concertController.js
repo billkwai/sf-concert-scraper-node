@@ -77,11 +77,15 @@ function createEmailContent(concerts) {
         for (var key of keys) {
             if(key === 'url') {
                 html += "<td>"
-                html += "<a href='"
-                html += concert[key]
-                html += "'>"
-                html += concert[key]
-                html += "</a>"
+                if(concert[key] != null) {
+                    html += "<a href='"
+                    html += concert[key]
+                    html += "'>"
+                    html += "link"
+                    html += "</a>"
+                } else {
+                    html += "null"
+                }
                 html += "</td>"
             } else {
                 html += "<td>"
@@ -110,11 +114,15 @@ function createEmailContent(concerts) {
         for (var key of keys) {
             if(key === 'url') {
                 html += "<td>"
-                html += "<a href='"
-                html += concert[key]
-                html += "'>"
-                html += concert[key]
-                html += "</a>"
+                if(concert[key] != null) {
+                    html += "<a href='"
+                    html += concert[key]
+                    html += "'>"
+                    html += "link"
+                    html += "</a>"
+                } else {
+                    html += "null"
+                }
                 html += "</td>"
             } else {
                 html += "<td>"

@@ -3,6 +3,13 @@ const cheerio = require('cheerio');
 const moment = require('moment-timezone');
 moment.tz.setDefault('Etc/UTC');
 
+function scrape() {
+    const allEvents = Promise.all([scrapeFillmore(), scrapeFoopee()]).then(function(values) {
+        return values[0].concat(values[1]);
+    }).catch(console.error);
+    return allEvents;
+}
+
 function scrapeFillmore() {
     const url = 'https://thefillmore.com/calendar';
     
@@ -54,7 +61,7 @@ function scrapeFoopee() {
     const event_price_re = /\$\d{1,}/;
     const event_time_re = /\d{1,2}(:\d{2})?([ap]m)/;
 
-    let events = axios(url)
+    return axios(url)
     .then(response => {
         const venues = ['1015_Folsom__S_F_','August_Hall__S_F_'];
         const html = response.data;
@@ -84,6 +91,9 @@ function scrapeFoopee() {
                     const eventPrice_match = eventText.match(event_price_re);
                     if(eventPrice_match) { // get event price
                         eventPrice = eventPrice_match[0];
+                        if(!eventPrice.includes('.')) { // complete price format if lacking period (e.g., $25)
+                            eventPrice += ".00";
+                        }
                     } else {
                         eventPrice = null;
                     }
@@ -108,6 +118,5 @@ function scrapeFoopee() {
     .catch(console.error);
 }
 
-module.exports.scrapeFillmore = scrapeFillmore;
-module.exports.scrapeFoopee = scrapeFoopee;
+module.exports.scrape = scrape;
 

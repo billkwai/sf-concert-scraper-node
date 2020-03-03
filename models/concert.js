@@ -84,9 +84,9 @@ function removeOutdatedConcerts() {
 
 // identifies new concerts and adds them to database
 function getConcertDiff() {
-    return scraper.scrapeFillmore().then(function(data) {
-        return pool.query('SELECT * from concerts WHERE venue = ($1) ORDER BY title, venue, date_and_time;', ["Fillmore"]
-        ).then(res => {
+    return scraper.scrape().then(function(data) {
+        return pool.query('SELECT * from concerts ORDER BY date_and_time, title, venue')
+        .then(res => {
             let newEventsArr = [];
             let existingEvents = res.rows.sort(concertComparator); 
             let newEvents = data.sort(concertComparator);
@@ -103,14 +103,14 @@ function getConcertDiff() {
             }
 
             while (i < existingEvents.length && j < newEvents.length) {
-                if (concertComparator(existingEvents[i], newEvents[j]) == 1) {
+                if (concertComparator(existingEvents[i], newEvents[j]) == 1) { // new event
                     // sometimes, outdated events are still posted on the website
                     var now = new Date();
                     if(now < newEvents[j].date_and_time) {
                         newEventsArr.push(newEvents[j]);
                     }
                     j++;
-                } else if (concertComparator(existingEvents[i], newEvents[j]) == -1) {
+                } else if (concertComparator(existingEvents[i], newEvents[j]) == -1) { // deleted event
                     i++;
                 } else {
                     i++;
@@ -124,7 +124,7 @@ function getConcertDiff() {
 };
 
 function testConcerts() {
-    return scraper.scrapeFoopee();
+    return scraper.scrape();
 }
 
 const Concert = {
