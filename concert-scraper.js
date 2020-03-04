@@ -4,8 +4,11 @@ const moment = require('moment-timezone');
 moment.tz.setDefault('Etc/UTC');
 
 function scrape() {
-    const allEvents = Promise.all([scrapeFillmore(), scrapeFoopee()]).then(function(values) {
-        return values[0].concat(values[1]);
+    const url1 = 'http://www.foopee.com/punk/the-list/by-club.0.html';
+    const url2 = 'http://www.foopee.com/punk/the-list/by-club.1.html';
+    const url3 = 'http://www.foopee.com/punk/the-list/by-club.3.html';
+    const allEvents = Promise.all([scrapeFillmore(), scrapeFoopee(url1), scrapeFoopee(url2), scrapeFoopee(url3)]).then(function(values) {
+        return values[0].concat(values[1]).concat(values[2]).concat(values[3]);
     }).catch(console.error);
     return allEvents;
 }
@@ -54,16 +57,19 @@ function scrapeFillmore() {
     .catch(console.error);
 }
 
-function scrapeFoopee() {
-    const url = 'http://www.foopee.com/punk/the-list/by-club.0.html';
-
+function scrapeFoopee(url) {
     // regular expressions for foopee date, time, and price scraping
     const event_price_re = /\$\d{1,}/;
     const event_time_re = /\d{1,2}(:\d{2})?([ap]m)/;
 
     return axios(url)
     .then(response => {
-        const venues = ['1015_Folsom__S_F_','August_Hall__S_F_'];
+        const venues = ['1015_Folsom__S_F_','August_Hall__S_F_','Chapel__S_F_','Fox_Theater__Oakland','Great_American_Music_Hall__S_F_',
+         'Greek_Theater__UC_Berkeley_Campus','Independent__S_F_','Masonic__S_F_','Slim_s__S_F_','Midway__S_F_', 'Warfield__S_F_'];
+        const venuesMap = {'1015_Folsom__S_F_':'1015 Folsom','August_Hall__S_F_': 'August Hall','Chapel__S_F_':'Chapel',
+        'Fox_Theater__Oakland':'Fox Theater','Great_American_Music_Hall__S_F_': 'Great American Music Hall', 
+        'Greek_Theater__UC_Berkeley_Campus':'Greek Theater','Independent__S_F_':'Independent','Masonic__S_F_':'Masonic',
+        'Slim_s__S_F_':"Slim's",'Midway__S_F_':'Midway', 'Warfield__S_F_':'Warfield'};
         const html = response.data;
         const $ = cheerio.load(html);
         const allEvents = $('li');
@@ -107,7 +113,7 @@ function scrapeFoopee() {
                     }
 
                     const eventDateTime = moment.tz(eventDate + ' ' + eventTime, 'MMMM D YYYY h:mm a', 'America/Los_Angeles').utc().toDate();
-                    events.push({title: eventArtist.join(", "), venue: venueName, url: null, date_and_time: eventDateTime, price: eventPrice});
+                    events.push({title: eventArtist.join(", "), venue: venuesMap[venueName], url: null, date_and_time: eventDateTime, price: eventPrice});
                 });
             }
             return events;
