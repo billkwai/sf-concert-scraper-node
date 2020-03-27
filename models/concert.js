@@ -87,8 +87,9 @@ function getConcertDeleted(dbEvents, webEvents) {
         }
     };
     // wait for DB deletes to resolve
-    return Promise.all(dbQuery.map(p => p.catch(e => console.log(e))))
-    .then(result => {return [newExistingArr, deletedEventsArr]});
+    return Promise.all(dbQuery)
+    .then(result => {return [newExistingArr, deletedEventsArr]})
+    .catch(err => console.log(err));
 };
 
 // remove events that have already occured
