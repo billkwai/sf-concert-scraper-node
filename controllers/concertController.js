@@ -7,10 +7,11 @@ exports.update_concerts = function(req, res) {
     Concert.removeOutdatedConcerts()
     .then(() => {
         return Concert.getConcertDiff();
-    }).then((value) => {
-        //console.log(value);
+    }).then(function(value) {
         sendEmail(value);
-    }).catch(err => console.log(err.stack));
+    }).catch(err => {
+        console.log(err.stack)
+    });
     if(res) {
         return res.status(200).json({status: 'success', message: 'getConcert endpoint hit'});
     }
